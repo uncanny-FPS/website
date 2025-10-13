@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Store - Product Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>Fauji Cloth House</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li class="nav-dropdown">
+                    <a href="#products" class="nav-link dropdown-toggle">
+                        Products <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <ul class="dropdown-menu" id="productsDropdown">
+                        <!-- Dynamic categories and subcategories will be added here -->
+                    </ul>
+                </li>
+                <li><a href="#about" class="nav-link">About Us</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li id="adminLogoutLink" style="display: none;"><a href="#" class="nav-link" onclick="adminLogout()">Logout</a></li>
+                <li class="theme-toggle">
+                    <button id="themeToggle" onclick="toggleTheme()" class="theme-btn">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hidden Admin Access Area (works on both PC and mobile) -->
+    <div id="hiddenAdminAccess" style="position: fixed; top: 10px; right: 10px; width: 30px; height: 30px; background: transparent; cursor: pointer; z-index: 10000;" onclick="showAdminLogin()" title="Admin Access"></div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdminLogin()">&times;</span>
+            <h2>Admin Login</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminUsername">Username:</label>
+                    <input type="text" id="adminUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Password:</label>
+                    <input type="password" id="adminPassword" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Welcome to Fauji Cloth House</h1>
+                <p>Your trusted destination for quality clothing in Dunera, Punjab</p>
+                <button class="cta-button" onclick="scrollToSection('products')">View Products</button>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="products-section">
+            <div class="container">
+                <h2>Our Products</h2>
+                
+                <!-- Admin Only: Product Management -->
+                <div class="product-management admin-only" id="productManagement" style="display: none;">
+                    <h3>Add New Product</h3>
+                    <form id="productForm" class="product-form">
+                        <div class="form-group">
+                            <label for="productName">Product Name:</label>
+                            <input type="text" id="productName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productCategory">Category:</label>
+                            <select id="productCategory" required>
+                                <option value="">Select Category</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productSubcategory">Subcategory:</label>
+                            <select id="productSubcategory">
+                                <option value="">Select Subcategory (Optional)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productDescription">Description:</label>
+                            <textarea id="productDescription" rows="4" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productPrice">Price:</label>
+                            <input type="number" id="productPrice" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productImages">Images:</label>
+                            <input type="file" id="productImages" multiple accept="image/*">
+                            <div class="image-preview" id="imagePreview"></div>
+                        </div>
+                        
+                        <button type="submit">Add Product</button>
+                    </form>
+                </div>
+
+                <!-- Admin Only: Category Management -->
+                <div class="category-management admin-only" id="categoryManagement" style="display: none;">
+                    <h3>Categories & Subcategories</h3>
+                    <div class="category-controls">
+                        <div class="add-category">
+                            <input type="text" id="newCategory" placeholder="Add new category">
+                            <button onclick="addCategory()">Add Category</button>
+                        </div>
+                        <div class="add-subcategory">
+                            <select id="parentCategory">
+                                <option value="">Select parent category</option>
+                            </select>
+                            <input type="text" id="newSubcategory" placeholder="Add new subcategory">
+                            <button onclick="addSubcategory()">Add Subcategory</button>
+                        </div>
+                    </div>
+                    <div class="admin-actions" style="margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <button onclick="clearAllData()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            Clear All Data & Start Fresh
+                        </button>
+                        <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;">
+                            This will remove all categories, subcategories, and products. Use with caution!
+                        </p>
+                    </div>
+                    <div class="categories-display" id="categoriesDisplay"></div>
+                </div>
+
+
+                <!-- Product Filter -->
+                <div class="product-filter">
+                    <h3>Filter Products</h3>
+                    <div class="filter-controls">
+                        <select id="filterCategory">
+                            <option value="">All Categories</option>
+                        </select>
+                        <select id="filterSubcategory">
+                            <option value="">All Subcategories</option>
+                        </select>
+                        <button onclick="filterProducts()">Filter</button>
+                        <button onclick="clearFilters()">Clear Filters</button>
+                    </div>
+                </div>
+
+                <!-- Products Display -->
+                <div class="products-grid" id="productsGrid">
+                    <!-- Products will be dynamically added here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2>About Us</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3>Our Story</h3>
+                        <p>Welcome to Fauji Cloth House, your trusted destination for quality clothing in Dunera, Punjab. We've been serving our community with dedication and passion, offering a wide range of clothing and textile products to meet your every need.</p>
+                        
+                        <h3>Our Mission</h3>
+                        <p>To provide our customers with the best clothing and textile products at competitive prices while maintaining the highest standards of quality and customer service in the Dunera area.</p>
+                        
+                        <h3>Why Choose Fauji Cloth House?</h3>
+                        <ul>
+                            <li>Quality clothing at affordable prices</li>
+                            <li>Excellent customer service</li>
+                            <li>Convenient location in Dunera</li>
+                            <li>Wide range of textile products</li>
+                            <li>Trusted by the local community</li>
+                        </ul>
+                    </div>
+                    <div class="about-image">
+                        <img src="https://via.placeholder.com/400x300/4a90e2/ffffff?text=Fauji+Cloth+House" alt="Fauji Cloth House">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Us Section -->
+        <section id="contact" class="contact-section">
+            <div class="container">
+                <h2>Contact Us</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Get in Touch</h3>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Address</h4>
+                                <p>Fauji Cloth House<br>Nurpur Road, Dunera<br>Tehsil Dhar Kalan<br>District Pathankot, Punjab 145022</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h4>Phone Numbers</h4>
+                                <p><strong>Call:</strong> 8847674566<br><strong>WhatsApp:</strong> 9417197951</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Contact Methods</h4>
+                                <p>Call or WhatsApp us for<br>inquiries and orders</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h4>Business Hours</h4>
+                                <p>Monday - Sunday: 8AM-7PM<br>Open all days<br>No holidays</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <h3>Send us a Message</h3>
+                        <div class="whatsapp-contact-section">
+                            <a href="https://wa.me/919417197951" target="_blank" class="whatsapp-main-button">
+                                <i class="fab fa-whatsapp"></i> 
+                                <span>Chat with us on WhatsApp</span>
+                            </a>
+                        </div>
+                        <div class="form-divider">
+                            <span>OR</span>
+                        </div>
+                        <form id="contactForm">
+                            <div class="form-group">
+                                <input type="text" id="contactName" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="contactEmail" placeholder="Your Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="contactSubject" placeholder="Subject" required>
+                            </div>
+                            <div class="form-group">
+                                <textarea id="contactMessage" rows="5" placeholder="Your Message" required></textarea>
+                            </div>
+                            <button type="submit">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Fauji Cloth House</h3>
+                    <p>Your trusted destination for quality clothing in Dunera, Punjab. Serving the community with dedication and passion.</p>
+                    <div class="contact-info-footer">
+                        <p><strong>Address:</strong> Nurpur Road, Dunera<br>Tehsil Dhar Kalan, District Pathankot<br>Punjab 145022</p>
+                        <p><strong>Phone:</strong> 8847674566<br><strong>WhatsApp:</strong> 9417197951</p>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#products">Products</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/profile.php?id=100054619141783" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.instagram.com/fauji_cloth_house_dunera/?hl=en" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/919417197951" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="tel:8847674566" title="Call Us"><i class="fas fa-phone"></i></a>
+                    </div>
+                    <div class="business-hours-footer">
+                        <h4>Business Hours</h4>
+                        <p>Monday - Sunday: 8AM-7PM<br>Open all days - No holidays</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Fauji Cloth House, Dunera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script-vercel.js"></script>
+</body>
+</html>
