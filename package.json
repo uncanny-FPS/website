@@ -1,0 +1,11 @@
+﻿{
+  "name": "fauji-cloth-house",
+  "version": "1.0.0",
+  "description": "Fauji Cloth House website",
+  "type": "commonjs",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}
