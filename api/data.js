@@ -1,6 +1,5 @@
-// Vercel API Route for data management
-import fs from 'fs';
-import path from 'path';
+﻿const fs = require('fs');
+const path = require('path');
 
 // Data file path
 const DATA_FILE = path.join(process.cwd(), 'data.json');
@@ -41,7 +40,7 @@ function writeData(data) {
     }
 }
 
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -175,6 +174,4 @@ export default function handler(req, res) {
         console.error('API error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
-}
-
-
+};
